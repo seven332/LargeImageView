@@ -21,8 +21,6 @@ package com.hippo.largeimageview;
  */
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapRegionDecoder;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -44,23 +42,26 @@ public class TiledBitmapSource extends ImageSource {
         public Bitmap bitmap;
         public boolean loading;
         public boolean visible;
+        public boolean failed;
     }
 
-    private BitmapRegionDecoder mDecoder;
+    private RegionDecoder mDecoder;
     // The width of parent view
     private int mWindowWidth;
     // The height of parent view
     private int mWindowHeight;
+    // The max width and height for tile
     private int mMaxTileSize;
+    // Indicate whether animator is running
     private boolean mAnimating;
 
     private Paint mPaint;
 
+    // Sample for current rendered image
     private int mCurrentSample;
+    // Sample for image fill windows
     private int mFullSample;
-    // StrongTile
     private List<Tile> mFullTiles;
-    // WeakTile
     private final SparseArray<List<Tile>> mTilesMap = new SparseArray<>();
 
     private FullTileTask mFullTileTask;
@@ -72,7 +73,7 @@ public class TiledBitmapSource extends ImageSource {
     private final RectF mTempRectF2 = new RectF();
     private final List<Tile> mTempTileList = new ArrayList<>();
 
-    public TiledBitmapSource(BitmapRegionDecoder decoder) {
+    public TiledBitmapSource(RegionDecoder decoder) {
         mDecoder = decoder;
         mPaint = new Paint(Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG);
     }
@@ -133,6 +134,8 @@ public class TiledBitmapSource extends ImageSource {
             if (bitmap != null) {
                 bitmap.recycle();
                 tile.bitmap = null;
+                // Reset failed flag
+                tile.failed = false;
             }
         }
     }
@@ -171,8 +174,11 @@ public class TiledBitmapSource extends ImageSource {
         }
         mLoadTileTaskList.clear();
 
+        // Start FullTileTask
         mFullTileTask = new FullTileTask(this);
         mFullTileTask.execute();
+
+        invalidateSelf();
     }
 
     private void onFullTileDone(List<Tile> tiles) {
@@ -233,7 +239,7 @@ public class TiledBitmapSource extends ImageSource {
         final Rect src2 = mTempRect2;
 
         boolean firstMiss = true;
-        // First get missing tile
+        // Get missing tiles
         for (Tile t : tiles) {
             s.set(t.rect);
             if (s.intersect(src)) {
@@ -248,9 +254,10 @@ public class TiledBitmapSource extends ImageSource {
                         src2.union(s);
                     }
 
-                    if (!t.loading && !mAnimating) {
+                    if (!t.loading && !t.failed && !mAnimating) {
                         // It is not animating now and
-                        // the tile is not loading, start load tile task
+                        // the tile is not loading, not have failed,
+                        // start load tile task now
                         final LoadTileTask task = new LoadTileTask(this, t, sample);
                         mLoadTileTaskList.add(task);
                         task.execute();
@@ -305,9 +312,6 @@ public class TiledBitmapSource extends ImageSource {
         final int step = mMaxTileSize * sample;
         final List<Tile> list = new ArrayList<>(ceilDiv(width, step) * ceilDiv(height, step));
 
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = sample;
-
         for (int y = 0; y < height; y += step) {
             for (int x = 0; x < width; x += step) {
                 final int w = Math.min(step, width - x);
@@ -337,6 +341,7 @@ public class TiledBitmapSource extends ImageSource {
                         if (bitmap != null) {
                             bitmap.recycle();
                             tile.bitmap = null;
+                            // Don't reset failed flag for current sample
                         }
                     }
                 }
@@ -397,6 +402,7 @@ public class TiledBitmapSource extends ImageSource {
             mFullTileTask.cancel(false);
         }
         for (LoadTileTask task : mLoadTileTaskList) {
+            recycled = true;
             task.recycle();
             task.cancel(false);
         }
@@ -408,24 +414,21 @@ public class TiledBitmapSource extends ImageSource {
         mDecoder = null;
     }
 
-    /**
-     * The BaseTask for all the other tasks.
-     * Handle mImageSource recycle.
-     */
+
+    // The BaseTask for all the other tasks.
+    // Handle mImageSource recycle.
     private static abstract class BaseTask<Params, Progress, Result>
             extends AsyncTask<Params, Progress, Result> {
 
-        protected BitmapRegionDecoder mDecoder;
+        protected RegionDecoder mDecoder;
         private boolean mRecycle;
 
-        public BaseTask(BitmapRegionDecoder decoder) {
+        public BaseTask(RegionDecoder decoder) {
             mDecoder = decoder;
         }
 
-        /**
-         * Call it before {@link #cancel(boolean)} if you want to
-         * recycle the ImageSource.
-         */
+        // Call it before {@link #cancel(boolean)} if you want to
+        // recycle the ImageSource.
         public void recycle() {
             mRecycle = true;
         }
@@ -441,7 +444,7 @@ public class TiledBitmapSource extends ImageSource {
     private static class FullTileTask extends BaseTask<Void, Void, List<Tile>> {
 
         private final WeakReference<TiledBitmapSource> mSource;
-        private final BitmapRegionDecoder mDecoder;
+        private final RegionDecoder mDecoder;
         private final int mFullSample;
         private final int mMaxTileSize;
 
@@ -460,9 +463,6 @@ public class TiledBitmapSource extends ImageSource {
             final int step = mMaxTileSize * mFullSample;
             final List<Tile> list = new ArrayList<>(ceilDiv(width, step) * ceilDiv(height, step));
 
-            final BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = mFullSample;
-
             for (int y = 0; y < height; y += step) {
                 for (int x = 0; x < width; x += step) {
                     if (isCancelled()) {
@@ -471,11 +471,14 @@ public class TiledBitmapSource extends ImageSource {
                     final int w = Math.min(step, width - x);
                     final int h = Math.min(step, height - y);
                     final Rect rect = new Rect(x, y, x + w, y + h);
-                    // TODO Catch OOM
-                    final Bitmap bitmap = mDecoder.decodeRegion(rect, options);
+                    final Bitmap bitmap = mDecoder.decodeRegion(rect, mFullSample);
                     final Tile tile = new Tile();
                     tile.rect = rect;
                     tile.bitmap = bitmap;
+                    if (bitmap == null) {
+                        Log.w(LOG_TAG, "Failed to decode full tiles");
+                        tile.failed = true;
+                    }
                     list.add(tile);
                 }
             }
@@ -506,7 +509,7 @@ public class TiledBitmapSource extends ImageSource {
 
         private final WeakReference<TiledBitmapSource> mSource;
         private final WeakReference<Tile> mTile;
-        private final BitmapRegionDecoder mDecoder;
+        private final RegionDecoder mDecoder;
         private final int mSample;
 
         public LoadTileTask(TiledBitmapSource source, Tile tile, int sample) {
@@ -521,13 +524,11 @@ public class TiledBitmapSource extends ImageSource {
         @Override
         protected Bitmap doInBackground(Void... params) {
             final Tile tile = mTile.get();
-            if (tile == null) { return null; }
-
-            final BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = mSample;
-            // TODO catch OOM
-            final Bitmap bitmap = mDecoder.decodeRegion(tile.rect, options);
-            return bitmap;
+            if (tile != null) {
+                return mDecoder.decodeRegion(tile.rect, mSample);
+            } else {
+                return null;
+            }
         }
 
         @Override
@@ -536,11 +537,16 @@ public class TiledBitmapSource extends ImageSource {
             final Tile tile = mTile.get();
             if (source == null || tile == null) {
                 Log.w(LOG_TAG, "Should call cancel() on LoadTileTask");
-                if (bitmap != null) { bitmap.recycle(); }
+                if (bitmap != null) {
+                    bitmap.recycle();
+                }
             } else {
-                // TODO What if bitmap is null ? Add a flag ?
                 tile.loading = false;
                 tile.bitmap = bitmap;
+                if (bitmap == null) {
+                    Log.w(LOG_TAG, "Can't decode tile: " + mSample + "_" + tile.rect);
+                    tile.failed = true;
+                }
                 // Callback
                 source.onLoadTileDone(this, mSample);
             }
