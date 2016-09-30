@@ -2,7 +2,7 @@
 
 LargeImageView 可以用来显示超大图片，同时也支持手势操作。
 
-LargeImageView can be used to display large image，it also support gestures.
+LargeImageView can be used to display large image, it also support gestures.
 
 
 # Usage
@@ -30,7 +30,7 @@ Add Image as dependency in project `build.gradle`.
 
 # License
 
-    Copyright (C) 2015-2016 Hippo Seven
+    Copyright 2016 Hippo Seven
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
