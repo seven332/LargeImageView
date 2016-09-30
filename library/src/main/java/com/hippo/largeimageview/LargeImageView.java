@@ -45,6 +45,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
+// TODO Add Gesture listener to override
 public class LargeImageView extends View implements ImageSource.Callback, GestureRecognizer.Listener {
 
     @IntDef({ORIENTATION_0, ORIENTATION_90, ORIENTATION_180, ORIENTATION_270})
@@ -541,6 +542,11 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
             requestLayout();
         }
         invalidate();
+    }
+
+    @Override
+    public void onImageFailed(@NonNull ImageSource who) {
+        // TODO Add a listener to handle it
     }
 
     @Override

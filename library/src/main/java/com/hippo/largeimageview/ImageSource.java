@@ -44,6 +44,20 @@ public abstract class ImageSource {
         return mCallback != null ? mCallback.get() : null;
     }
 
+    public void callSelfReady() {
+        final Callback callback = getCallback();
+        if (callback != null) {
+            callback.onImageReady(this);
+        }
+    }
+
+    public void callSelfFailed() {
+        final Callback callback = getCallback();
+        if (callback != null) {
+            callback.onImageFailed(this);
+        }
+    }
+
     public void invalidateSelf() {
         final Callback callback = getCallback();
         if (callback != null) {
@@ -84,6 +98,8 @@ public abstract class ImageSource {
     interface Callback {
 
         void onImageReady(@NonNull ImageSource who);
+
+        void onImageFailed(@NonNull ImageSource who);
 
         void invalidateImage(@NonNull ImageSource who);
 
