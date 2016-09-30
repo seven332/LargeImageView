@@ -34,6 +34,7 @@ import java.lang.ref.WeakReference;
 public abstract class ImageSource {
 
     private WeakReference<ImageSource.Callback> mCallback;
+    private boolean mVisible = true;
 
     /**
      * Init this ImageSource. If init action takes a long time,
@@ -120,6 +121,22 @@ public abstract class ImageSource {
         if (callback != null) {
             callback.unscheduleImage(this, what);
         }
+    }
+
+    /**
+     * Set whether this ImageSource is visible.  This generally does not impact
+     * the ImageSource's behavior, but is a hint that can be used by some
+     * ImageSource, for example, to decide whether run animations.
+     */
+    public void setVisible(boolean visible) {
+        if (mVisible != visible) {
+            mVisible = visible;
+            invalidateSelf();
+        }
+    }
+
+    public boolean isVisible() {
+        return mVisible;
     }
 
     /**

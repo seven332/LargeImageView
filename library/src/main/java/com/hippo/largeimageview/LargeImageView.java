@@ -681,6 +681,30 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
     }
 
     @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        if (mImage != null) {
+            mImage.setVisible(visibility == VISIBLE);
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (mImage != null) {
+            mImage.setVisible(getVisibility() == VISIBLE);
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mImage != null) {
+            mImage.setVisible(false);
+        }
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
         mGestureRecognizer.onTouchEvent(event);
         return true;

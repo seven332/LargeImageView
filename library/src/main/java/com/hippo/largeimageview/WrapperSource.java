@@ -44,6 +44,7 @@ public abstract class WrapperSource extends ImageSource implements ImageSource.C
         }
         mBase = base;
         base.setCallback(this);
+        base.setVisible(isVisible());
         base.setWindowSize(mWindowWidth, mWindowHeight);
         base.setMaxBitmapSize(mMaxBitmapSize);
         // Ready
@@ -63,6 +64,24 @@ public abstract class WrapperSource extends ImageSource implements ImageSource.C
     @Override
     public boolean isReady() {
         return mBase != null;
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        if (mBase != null) {
+            mBase.setVisible(visible);
+        } else {
+            super.setVisible(visible);
+        }
+    }
+
+    @Override
+    public boolean isVisible() {
+        if (mBase != null) {
+            return mBase.isVisible();
+        } else {
+            return super.isVisible();
+        }
     }
 
     @Override
