@@ -1,19 +1,18 @@
 package com.hippo.largeimageview.example;
 
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapRegionDecoder;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import com.hippo.largeimageview.BitmapSource;
-import com.hippo.largeimageview.ImageSource;
+import com.hippo.largeimageview.AutoSource;
 import com.hippo.largeimageview.LargeImageView;
-import com.hippo.largeimageview.TiledBitmapSource;
+import com.hippo.streampipe.InputStreamPipe;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,18 +22,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final LargeImageView view = (LargeImageView) findViewById(R.id.large_image_view);
-
-        ImageSource source = null;
-        try {
-            source = new TiledBitmapSource(BitmapRegionDecoder.newInstance(getResources().openRawResource(R.raw.jpeg_large), false));
-        } catch (IOException e) {
-
-        }
-
-
-
-        view.setImage(source);
-
+        view.setImage(new AutoSource(new ResourceInputStreamPipe(R.raw.jpeg_large)));
         view.setBackgroundColor(Color.BLUE);
 
         Button button = (Button) findViewById(R.id.change_size);
@@ -63,4 +51,43 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    private class ResourceInputStreamPipe implements InputStreamPipe {
+
+        private final int mId;
+        private InputStream mStream;
+
+        public ResourceInputStreamPipe(int id) {
+            mId = id;
+        }
+
+        @Override
+        public void obtain() {}
+
+        @Override
+        public void release() {}
+
+        @NonNull
+        @Override
+        public InputStream open() throws IOException {
+            if (mStream != null) {
+                throw new IOException("Can't open twice");
+            }
+            return getResources().openRawResource(mId);
+        }
+
+        @Override
+        public void close() {
+            if (mStream != null) {
+                try {
+                    mStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                mStream = null;
+            }
+        }
+    }
+
+
 }
