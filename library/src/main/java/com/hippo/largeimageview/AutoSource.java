@@ -37,7 +37,7 @@ public class AutoSource extends WrapperSource {
     private static final String LOG_TAG = AutoSource.class.getSimpleName();
 
     private boolean mInit;
-    private int mMaxBitmapSize;
+    private int mBitmapLimit;
     private InitTask mTask;
     private InputStreamPipe mPipe;
 
@@ -54,12 +54,12 @@ public class AutoSource extends WrapperSource {
     @Override
     public void setMaxBitmapSize(int maxSize) {
         super.setMaxBitmapSize(maxSize);
-        mMaxBitmapSize = maxSize;
+        mBitmapLimit = maxSize / 2;
         initSource();
     }
 
     public void initSource() {
-        if (!mInit || mMaxBitmapSize == 0 || mTask != null || isReady()) {
+        if (!mInit || mBitmapLimit == 0 || mTask != null || isReady()) {
             return;
         }
         mTask = new InitTask(this);
@@ -108,7 +108,7 @@ public class AutoSource extends WrapperSource {
                 return null;
             }
 
-            if (options.outWidth <= mMaxBitmapSize && options.outHeight <= mMaxBitmapSize) {
+            if (options.outWidth <= mBitmapLimit && options.outHeight <= mBitmapLimit) {
                 // BitmapSource
                 options.inJustDecodeBounds = false;
                 try {
