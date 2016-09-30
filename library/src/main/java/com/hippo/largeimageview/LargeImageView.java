@@ -20,6 +20,8 @@ package com.hippo.largeimageview;
  * Created by Hippo on 9/26/2016.
  */
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -38,8 +40,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Interpolator;
-
-import com.hippo.animator.ValueAnimatorCompat;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -716,29 +716,33 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
     // Animator
     ////////////////////
 
-    private abstract static class BaseAnimator extends ValueAnimatorCompat
-            implements ValueAnimatorCompat.AnimatorListener,
-            ValueAnimatorCompat.AnimatorUpdateListener {
+    private abstract static class BaseAnimator extends ValueAnimator
+            implements Animator.AnimatorListener,
+            ValueAnimator.AnimatorUpdateListener {
 
         private final LargeImageView mView;
 
         public BaseAnimator(LargeImageView view) {
             mView = view;
-            setListener(this);
+            addListener(this);
+            addUpdateListener(this);
         }
 
         @Override
-        public void onAnimationStart(ValueAnimatorCompat animator) {
+        public void onAnimationStart(Animator animator) {
             mView.onAnimatorStart();
         }
 
         @Override
-        public void onAnimationEnd(ValueAnimatorCompat animator) {
+        public void onAnimationEnd(Animator animator) {
             mView.onAnimatorEnd();
         }
 
         @Override
-        public void onAnimationCancel(ValueAnimatorCompat animator) {}
+        public void onAnimationCancel(Animator animator) {}
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {}
     }
 
     private static class SmoothScaler extends BaseAnimator {
@@ -754,7 +758,6 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
             mView = view;
             setDuration(300);
             setInterpolator(FAST_SLOW_INTERPOLATOR);
-            setUpdateListener(this);
             setFloatValues(0.0f, 1.0f);
         }
 
@@ -771,8 +774,8 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
         }
 
         @Override
-        public void onAnimationUpdate(ValueAnimatorCompat animator) {
-            final float value = getAnimatedFloatValue();
+        public void onAnimationUpdate(ValueAnimator animator) {
+            final float value = (Float) getAnimatedValue();
             mView.setScale(mX, mY, lerp(mStartScale, mEndScale, value));
         }
     }
@@ -792,7 +795,6 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
             mView = view;
             mFling = new Fling(view.getContext());
             setInterpolator(Fling.FLING_INTERPOLATOR);
-            setUpdateListener(this);
             setFloatValues(0.0f, 1.0f);
         }
 
@@ -832,8 +834,8 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
         }
 
         @Override
-        public void onAnimationUpdate(ValueAnimatorCompat animator) {
-            final float value = animator.getAnimatedFloatValue();
+        public void onAnimationUpdate(ValueAnimator animator) {
+            final float value = (Float) getAnimatedValue();
             final float x = mDx * value;
             final float y = mDy * value;
             final float offsetX = x - mLastX;
