@@ -28,6 +28,13 @@ Add Image as dependency in project `build.gradle`.
     }
 
 
+# Similar Projects
+
+- [Subsampling Scale Image View](https://github.com/davemorrissey/subsampling-scale-image-view)
+- [TileView](https://github.com/moagrius/TileView)
+- [WorldMap](https://github.com/johnnylambada/WorldMap)
+
+
 # License
 
     Copyright 2016 Hippo Seven
