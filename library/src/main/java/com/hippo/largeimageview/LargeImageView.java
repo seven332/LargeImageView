@@ -27,7 +27,6 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -83,7 +82,7 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
     // The area in view for whole Image
     private final RectF mDst = new RectF();
     // The area in image to draw
-    private final Rect mSrcActual = new Rect();
+    private final RectF mSrcActual = new RectF();
     // The area in view to draw
     private final RectF mDstActual = new RectF();
 
@@ -584,7 +583,7 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
     private void applyRectInWindow() {
         final RectF dst = mDst;
         final RectF dstActual = mDstActual;
-        final Rect srcActual = mSrcActual;
+        final RectF srcActual = mSrcActual;
 
         dstActual.set(dst);
         if (dstActual.intersect(0, 0, mWindowWidth, mWindowHeight)) {
@@ -592,13 +591,13 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
                 // Still dst
                 srcActual.set(0, 0, mImageWidth, mImageHeight);
             } else {
-                srcActual.left = lerp(0, mImageWidth,
+                srcActual.left = lerp(0.0f, mImageWidth,
                         norm(dst.left, dst.right, dstActual.left));
-                srcActual.right = lerp(0, mImageWidth,
+                srcActual.right = lerp(0.0f, mImageWidth,
                         norm(dst.left, dst.right, dstActual.right));
-                srcActual.top = lerp(0, mImageHeight,
+                srcActual.top = lerp(0.0f, mImageHeight,
                         norm(dst.top, dst.bottom, dstActual.top));
-                srcActual.bottom = lerp(0, mImageHeight,
+                srcActual.bottom = lerp(0.0f, mImageHeight,
                         norm(dst.top, dst.bottom, dstActual.bottom));
             }
         } else {

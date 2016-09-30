@@ -22,8 +22,8 @@ package com.hippo.largeimageview;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.annotation.NonNull;
 
@@ -31,6 +31,7 @@ public class BitmapSource extends ImageSource {
 
     private Bitmap mBitmap;
     private Paint mPaint;
+    private Matrix mMatrix;
     private final boolean mIsOwner;
 
     public BitmapSource(@NonNull Bitmap bitmap) {
@@ -40,6 +41,7 @@ public class BitmapSource extends ImageSource {
     public BitmapSource(@NonNull Bitmap bitmap, boolean isOwner) {
         mBitmap = bitmap;
         mIsOwner = isOwner;
+        mMatrix = new Matrix();
         mPaint = new Paint(Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG);
     }
 
@@ -75,9 +77,10 @@ public class BitmapSource extends ImageSource {
     }
 
     @Override
-    public void draw(Canvas canvas, Rect src, RectF dst) {
+    public void draw(Canvas canvas, RectF src, RectF dst) {
         if (mBitmap != null) {
-            canvas.drawBitmap(mBitmap, src, dst, mPaint);
+            mMatrix.setRectToRect(src, dst, Matrix.ScaleToFit.FILL);
+            canvas.drawBitmap(mBitmap, mMatrix, mPaint);
         }
     }
 
@@ -88,6 +91,7 @@ public class BitmapSource extends ImageSource {
                 mBitmap.recycle();
             }
             mBitmap = null;
+            mMatrix = null;
             mPaint = null;
         }
     }

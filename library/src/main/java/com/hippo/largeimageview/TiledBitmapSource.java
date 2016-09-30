@@ -22,6 +22,7 @@ package com.hippo.largeimageview;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -67,10 +68,12 @@ public class TiledBitmapSource extends ImageSource {
     private FullTileTask mFullTileTask;
     private final List<LoadTileTask> mLoadTileTaskList = new ArrayList<>();
 
-    private final Rect mTempRect = new Rect();
-    private final Rect mTempRect2 = new Rect();
-    private final RectF mTempRectF = new RectF();
+    private final Matrix mMatrix = new Matrix();
+
+    private final RectF mTempRectF1 = new RectF();
     private final RectF mTempRectF2 = new RectF();
+    private final RectF mTempRectF3 = new RectF();
+    private final RectF mTempRectF4 = new RectF();
     private final List<Tile> mTempTileList = new ArrayList<>();
 
     public TiledBitmapSource(RegionDecoder decoder) {
@@ -194,7 +197,7 @@ public class TiledBitmapSource extends ImageSource {
         }
     }
 
-    private static void mapRect(Rect src, RectF dst, Rect s, RectF d) {
+    private static void mapRect(RectF src, RectF dst, RectF s, RectF d) {
         final float sX = src.left;
         final float sY = src.top;
         final float dX = dst.left;
@@ -207,7 +210,7 @@ public class TiledBitmapSource extends ImageSource {
                 dY + (s.bottom - sY) * scaleY);
     }
 
-    private static void mapRect(Rect rect, int sample) {
+    private static void mapRect(RectF rect, int sample) {
         rect.left /= sample;
         rect.top /= sample;
         rect.right /= sample;
@@ -215,9 +218,10 @@ public class TiledBitmapSource extends ImageSource {
     }
 
     // For full tiles
-    private void drawFullTiles(Canvas canvas, Rect src, RectF dst, List<Tile> tiles, int sample) {
-        final Rect s = mTempRect;
-        final RectF d = mTempRectF;
+    private void drawFullTiles(Canvas canvas, RectF src, RectF dst, List<Tile> tiles, int sample) {
+        final RectF s = mTempRectF1;
+        final RectF d = mTempRectF2;
+        final Matrix matrix = mMatrix;
         final Paint paint = mPaint;
 
         for (final Tile t : tiles) {
@@ -228,15 +232,16 @@ public class TiledBitmapSource extends ImageSource {
             mapRect(src, dst, s, d);
             s.offset(-t.rect.left, -t.rect.top);
             mapRect(s, sample);
-            canvas.drawBitmap(bitmap, s, d, paint);
+            matrix.setRectToRect(s, d, Matrix.ScaleToFit.FILL);
+            canvas.drawBitmap(bitmap, matrix, paint);
         }
     }
 
     // For not full tiles
-    private void drawMapTiles(Canvas canvas, Rect src, RectF dst, List<Tile> tiles, int sample) {
+    private void drawMapTiles(Canvas canvas, RectF src, RectF dst, List<Tile> tiles, int sample) {
         final List<Tile> list = mTempTileList;
-        final Rect s = mTempRect;
-        final Rect src2 = mTempRect2;
+        final RectF s = mTempRectF1;
+        final RectF src2 = mTempRectF2;
 
         boolean firstMiss = true;
         // Get missing tiles
@@ -271,13 +276,13 @@ public class TiledBitmapSource extends ImageSource {
             }
         }
 
-        final RectF d = mTempRectF;
+        final RectF d = mTempRectF3;
+        final Matrix matrix = mMatrix;
         final Paint paint = mPaint;
 
         // Draw full tiles to fill missing rect
-        // TODO The image flicker when scrolling if scale is large. How to fix it?
         if (!firstMiss) {
-            final RectF dst2 = mTempRectF2;
+            final RectF dst2 = mTempRectF4;
             mapRect(src, dst, src2, dst2);
             for (final Tile t : mFullTiles) {
                 s.set(t.rect);
@@ -287,7 +292,8 @@ public class TiledBitmapSource extends ImageSource {
                 mapRect(src2, dst2, s, d);
                 s.offset(-t.rect.left, -t.rect.top);
                 mapRect(s, mFullSample);
-                canvas.drawBitmap(bitmap, s, d, paint);
+                matrix.setRectToRect(s, d, Matrix.ScaleToFit.FILL);
+                canvas.drawBitmap(bitmap, matrix, paint);
             }
         }
 
@@ -300,7 +306,8 @@ public class TiledBitmapSource extends ImageSource {
             mapRect(src, dst, s, d);
             s.offset(-t.rect.left, -t.rect.top);
             mapRect(s, sample);
-            canvas.drawBitmap(bitmap, s, d, paint);
+            matrix.setRectToRect(s, d, Matrix.ScaleToFit.FILL);
+            canvas.drawBitmap(bitmap, matrix, paint);
         }
         list.clear();
     }
@@ -350,15 +357,15 @@ public class TiledBitmapSource extends ImageSource {
     }
 
     @Override
-    public void draw(Canvas canvas, Rect src, RectF dst) {
+    public void draw(Canvas canvas, RectF src, RectF dst) {
         if (mFullTiles == null) {
             // If mFullTiles is null, means first decode step
             // is not done. Wait for it.
             return;
         }
 
-        int sample = calculateSample(src.width() / (int) dst.width(),
-                src.height() / (int) dst.height());
+        int sample = calculateSample((int) (src.width() / dst.width()),
+                (int) (src.height() / dst.height()));
         // Full sample must be the biggest sample
         sample = Math.min(mFullSample, sample);
         // Update current sample

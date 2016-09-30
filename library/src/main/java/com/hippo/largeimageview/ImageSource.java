@@ -21,7 +21,6 @@ package com.hippo.largeimageview;
  */
 
 import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -91,7 +90,7 @@ public abstract class ImageSource {
 
     public abstract int getHeight();
 
-    public abstract void draw(Canvas canvas, Rect src, RectF dst);
+    public abstract void draw(Canvas canvas, RectF src, RectF dst);
 
     public abstract void recycle();
 

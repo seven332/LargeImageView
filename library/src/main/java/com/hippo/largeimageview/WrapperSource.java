@@ -21,7 +21,6 @@ package com.hippo.largeimageview;
  */
 
 import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.annotation.NonNull;
 
@@ -115,7 +114,7 @@ public abstract class WrapperSource extends ImageSource implements ImageSource.C
     }
 
     @Override
-    public void draw(Canvas canvas, Rect src, RectF dst) {
+    public void draw(Canvas canvas, RectF src, RectF dst) {
         if (mBase != null) {
             mBase.draw(canvas, src, dst);
         }
