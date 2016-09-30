@@ -430,7 +430,7 @@ public class TiledBitmapSource extends ImageSource {
     private static abstract class BaseTask<Params, Progress, Result>
             extends AsyncTask<Params, Progress, Result> {
 
-        protected RegionDecoder mDecoder;
+        protected final RegionDecoder mDecoder;
         private boolean mRecycle;
 
         public BaseTask(RegionDecoder decoder) {

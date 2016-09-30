@@ -946,11 +946,6 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
     ////////////////////
 
     @CheckResult
-    private static int lerp(int start, int stop, float amount) {
-        return start + (int) ((stop - start) * amount);
-    }
-
-    @CheckResult
     private static float lerp(float start, float stop, float amount) {
         return start + (stop - start) * amount;
     }
