@@ -128,11 +128,13 @@ public abstract class ImageSource {
      * the ImageSource's behavior, but is a hint that can be used by some
      * ImageSource, for example, to decide whether run animations.
      */
-    public void setVisible(boolean visible) {
-        if (mVisible != visible) {
+    public boolean setVisible(boolean visible) {
+        final boolean changed = mVisible != visible;
+        if (changed) {
             mVisible = visible;
             invalidateSelf();
         }
+        return changed;
     }
 
     public boolean isVisible() {

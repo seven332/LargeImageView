@@ -67,11 +67,11 @@ public abstract class WrapperSource extends ImageSource implements ImageSource.C
     }
 
     @Override
-    public void setVisible(boolean visible) {
+    public boolean setVisible(boolean visible) {
         if (mBase != null) {
-            mBase.setVisible(visible);
+            return mBase.setVisible(visible);
         } else {
-            super.setVisible(visible);
+            return super.setVisible(visible);
         }
     }
 
