@@ -102,6 +102,8 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
     @Nullable
     private ImageFling mImageFling;
 
+    private ImageInitListener mImageInitListener;
+
     private final PointF mTempPointF = new PointF();
     // The dump drawable to call
     // scheduleDrawable and unscheduleDrawable.
@@ -124,6 +126,10 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
 
     private void init(Context context) {
         mGestureRecognizer = new GestureRecognizer(context, this);
+    }
+
+    public void setImageInitListener(ImageInitListener imageInitListener) {
+        mImageInitListener = imageInitListener;
     }
 
     @Override
@@ -535,7 +541,7 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
 
     @Override
     public void onImageReady(@NonNull ImageSource who) {
-        if (who != mImage || !who.isReady()) {
+        if (who != mImage) {
             return;
         }
 
@@ -552,11 +558,21 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
             requestLayout();
         }
         invalidate();
+
+        if (mImageInitListener != null) {
+            mImageInitListener.onImageInitSuccessful();
+        }
     }
 
     @Override
     public void onImageFailed(@NonNull ImageSource who) {
-        // TODO Add a listener to handle it
+        if (who != mImage) {
+            return;
+        }
+
+        if (mImageInitListener != null) {
+            mImageInitListener.onImageInitFailed();
+        }
     }
 
     @Override
@@ -969,5 +985,15 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
         public void setColorFilter(ColorFilter colorFilter) {}
         @Override
         public int getOpacity() { return PixelFormat.OPAQUE; }
+    }
+
+    /**
+     * Listener for init {@code ImageSource}.
+     */
+    public interface ImageInitListener {
+
+        void onImageInitSuccessful();
+
+        void onImageInitFailed();
     }
 }
