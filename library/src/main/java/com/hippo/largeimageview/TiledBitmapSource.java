@@ -34,6 +34,9 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A ImageSource to show a large {@link Bitmap} via region decoding.
+ */
 public class TiledBitmapSource extends ImageSource {
 
     private static final String LOG_TAG = TiledBitmapSource.class.getSimpleName();

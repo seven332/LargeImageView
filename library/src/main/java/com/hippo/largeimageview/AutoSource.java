@@ -32,6 +32,9 @@ import com.hippo.streampipe.InputStreamPipe;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
+/**
+ * Choice {@link BitmapSource} or {@link TiledBitmapSource} automatically.
+ */
 public class AutoSource extends WrapperSource {
 
     private static final String LOG_TAG = AutoSource.class.getSimpleName();
@@ -58,7 +61,7 @@ public class AutoSource extends WrapperSource {
         initSource();
     }
 
-    public void initSource() {
+    private void initSource() {
         if (!mInit || mBitmapLimit == 0 || mTask != null || isReady()) {
             return;
         }

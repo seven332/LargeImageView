@@ -24,6 +24,9 @@ import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.support.annotation.NonNull;
 
+/**
+ * Wrapper for any ImageSource.
+ */
 public abstract class WrapperSource extends ImageSource implements ImageSource.Callback{
 
     private ImageSource mBase;

@@ -27,6 +27,9 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.support.annotation.NonNull;
 
+/**
+ * A ImageSource to show single {@link Bitmap}.
+ */
 public class BitmapSource extends ImageSource {
 
     private Bitmap mBitmap;

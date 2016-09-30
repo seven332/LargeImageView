@@ -302,11 +302,19 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
         }
     }
 
+    /**
+     * Return current orientation.
+     */
     @Orientation
     public int getOrientation() {
         return mOrientation;
     }
 
+    /**
+     * Set orientation for {@code ImageSource}.
+     * Must be one of {@link #ORIENTATION_0}, {@link #ORIENTATION_90},
+     * {@link #ORIENTATION_180} and {@link #ORIENTATION_270}.
+     */
     public void setOrientation(@Orientation int orientation) {
         if (mOrientation == orientation) {
             return;
@@ -327,7 +335,7 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
         invalidate();
     }
 
-    public void translate(float dx, float dy) {
+    private void translate(float dx, float dy) {
         final int wWidth = mWindowWidth;
         final int wHeight = mWindowHeight;
         if (wWidth <= 0 || wHeight <= 0) {
@@ -388,7 +396,7 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
         }
     }
 
-    public void setScale(float x, float y, float scale) {
+    private void setScale(float x, float y, float scale) {
         final int iWidth = mImageWidth;
         final int iHeight = mImageHeight;
         if (iWidth <= 0 || iHeight <= 0) {
@@ -420,7 +428,7 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
         invalidate();
     }
 
-    public void scale(float x, float y, float scale) {
+    private void scale(float x, float y, float scale) {
         setScale(x, y, mScale * scale);
     }
 
@@ -483,6 +491,9 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
         return !mDst.isEmpty();
     }
 
+    /**
+     * Set the {@code ImageSource} to show.
+     */
     public void setImage(ImageSource image) {
         if (mImage != null) {
             cancelAllAnimator();
