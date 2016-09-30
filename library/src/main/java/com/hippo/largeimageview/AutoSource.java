@@ -37,9 +37,9 @@ public class AutoSource extends WrapperSource {
     private static final String LOG_TAG = AutoSource.class.getSimpleName();
 
     private boolean mInit;
-    private int mBitmapLimit;
+    protected int mBitmapLimit;
     private InitTask mTask;
-    private InputStreamPipe mPipe;
+    protected InputStreamPipe mPipe;
 
     public AutoSource(@NonNull InputStreamPipe pipe) {
         mPipe = pipe;
