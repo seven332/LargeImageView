@@ -132,29 +132,28 @@ public class AutoSource extends WrapperSource {
             if (options.outWidth <= mBitmapLimit && options.outHeight <= mBitmapLimit) {
                 // BitmapSource
                 options.inJustDecodeBounds = false;
-                try {
-                    final Bitmap bitmap = BitmapFactory.decodeStream(pipe.open(), null, options);
+                final Bitmap bitmap = BitmapFactory.decodeStream(pipe.open(), null, options);
+                if (bitmap != null) {
                     return new BitmapSource(bitmap);
-                } catch (OutOfMemoryError e) {
-                    return null;
                 }
             } else {
                 // TiledBitmapSource
                 final BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(pipe.open(), false);
                 if (decoder != null) {
                     return new TiledBitmapSource(new SkiaRegionDecoder(decoder, Bitmap.Config.ARGB_8888));
-                } else {
-                    // Can't decode
-                    return null;
                 }
             }
         } catch (IOException e) {
+            return null;
+        } catch (OutOfMemoryError e) {
             return null;
         } finally {
             pipe.close();
             pipe.release();
             mPipe = null;
         }
+
+        return null;
     }
 
     private static class InitTask extends AsyncTask<Void, Void, ImageSource> {
