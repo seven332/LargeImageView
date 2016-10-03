@@ -539,6 +539,13 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
         invalidate();
     }
 
+    /**
+     * Return {@code ImageSource}.
+     */
+    public ImageSource getImage() {
+        return mImage;
+    }
+
     @Override
     public void onImageReady(@NonNull ImageSource who) {
         if (who != mImage) {
