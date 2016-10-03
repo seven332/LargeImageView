@@ -118,6 +118,20 @@ public abstract class WrapperSource extends ImageSource implements ImageSource.C
     }
 
     @Override
+    public void onTouchStart() {
+        if (mBase != null) {
+            mBase.onTouchStart();
+        }
+    }
+
+    @Override
+    public void onTouchEnd() {
+        if (mBase != null) {
+            mBase.onTouchEnd();
+        }
+    }
+
+    @Override
     public int getWidth() {
         if (mBase != null) {
             return mBase.getWidth();

@@ -741,6 +741,24 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
     @Override
     public void onDown() {
         cancelAllAnimator();
+
+        if (mImage != null) {
+            mImage.onTouchStart();
+        }
+    }
+
+    @Override
+    public void onUp() {
+        if (mImage != null) {
+            mImage.onTouchEnd();
+        }
+    }
+
+    @Override
+    public void onCancel() {
+        if (mImage != null) {
+            mImage.onTouchEnd();
+        }
     }
 
     @Override

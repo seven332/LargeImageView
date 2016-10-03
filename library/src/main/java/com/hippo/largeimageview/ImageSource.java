@@ -156,12 +156,22 @@ public abstract class ImageSource {
     /**
      * Indicate a animator on this {@code ImageSource} start.
      */
-    public abstract void onAnimatorStart();
+    public void onAnimatorStart() {}
 
     /**
      * Indicate a animator on this {@code ImageSource} end.
      */
-    public abstract void onAnimatorEnd();
+    public void onAnimatorEnd() {}
+
+    /**
+     * Indicate a finger touch the View.
+     */
+    public void onTouchStart() {}
+
+    /**
+     * Indicate a finger leave the View.
+     */
+    public void onTouchEnd() {}
 
     /**
      * Return the width of this {@code ImageSource}.

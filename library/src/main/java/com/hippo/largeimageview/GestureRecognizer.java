@@ -35,6 +35,8 @@ class GestureRecognizer implements GestureDetector.OnGestureListener,
 
     public interface Listener {
         void onDown();
+        void onUp();
+        void onCancel();
         void onSingleTap(float x, float y);
         void onDoubleTap(float x, float y);
         void onLongPress(float x, float y);
@@ -64,6 +66,12 @@ class GestureRecognizer implements GestureDetector.OnGestureListener,
     public void onTouchEvent(MotionEvent event) {
         // If pointer count is more than 1, must be scale action
         switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_UP:
+                mListener.onUp();
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                mListener.onCancel();
+                break;
             case MotionEvent.ACTION_POINTER_DOWN:
                 mScale = event.getPointerCount() > 1;
                 break;

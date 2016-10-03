@@ -64,12 +64,6 @@ public class BitmapSource extends ImageSource {
     public void setMaxBitmapSize(int maxSize) {}
 
     @Override
-    public void onAnimatorStart() {}
-
-    @Override
-    public void onAnimatorEnd() {}
-
-    @Override
     public int getWidth() {
         return mBitmap.getWidth();
     }

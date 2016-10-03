@@ -58,6 +58,8 @@ public class TiledBitmapSource extends ImageSource {
     private int mMaxTileSize;
     // Indicate whether animator is running
     private boolean mAnimating;
+    // Indicate whether finger is on the View
+    private boolean mTouching;
 
     private Paint mPaint;
 
@@ -114,6 +116,18 @@ public class TiledBitmapSource extends ImageSource {
     @Override
     public void onAnimatorEnd() {
         mAnimating = false;
+        // Trigger loading missing tiles
+        invalidateSelf();
+    }
+
+    @Override
+    public void onTouchStart() {
+        mTouching = true;
+    }
+
+    @Override
+    public void onTouchEnd() {
+        mTouching = false;
         // Trigger loading missing tiles
         invalidateSelf();
     }
@@ -266,7 +280,7 @@ public class TiledBitmapSource extends ImageSource {
                         src2.union(s);
                     }
 
-                    if (!t.loading && !t.failed && !mAnimating) {
+                    if (!t.loading && !t.failed && !mAnimating && !mTouching) {
                         // It is not animating now and
                         // the tile is not loading, not have failed,
                         // start load tile task now
