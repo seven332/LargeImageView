@@ -1,18 +1,11 @@
 package com.hippo.largeimageview.example;
 
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.Button;
-
-import com.hippo.largeimageview.AutoSource;
-import com.hippo.largeimageview.LargeImageView;
-import com.hippo.streampipe.InputStreamPipe;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,74 +13,41 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        final LargeImageView view = (LargeImageView) findViewById(R.id.large_image_view);
-        view.setImage(new AutoSource(new ResourceInputStreamPipe(R.raw.jpeg_large)));
-        view.setBackgroundColor(Color.BLUE);
-
-        Button button = (Button) findViewById(R.id.change_size);
-        button.setOnClickListener(new View.OnClickListener() {
-            private boolean i;
-            @Override
-            public void onClick(View v) {
-                i = !i;
-                if (i) {
-                    view.setBottom(view.getBottom() - 500);
-                } else {
-                    view.setBottom(view.getBottom() + 500);
-                }
-            }
-        });
-
-        Button button2 = (Button) findViewById(R.id.orientation);
-        button2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int o  = view.getOrientation() + 1;
-                if (o > LargeImageView.ORIENTATION_270) {
-                    o = LargeImageView.ORIENTATION_0;
-                }
-                view.setOrientation(o);
-            }
-        });
+        ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
+        viewPager.setAdapter(new Adapter(getSupportFragmentManager()));
     }
 
-    private class ResourceInputStreamPipe implements InputStreamPipe {
+    private class Adapter extends FragmentStatePagerAdapter {
 
-        private final int mId;
-        private InputStream mStream;
-
-        public ResourceInputStreamPipe(int id) {
-            mId = id;
+        public Adapter(FragmentManager fm) {
+            super(fm);
         }
 
         @Override
-        public void obtain() {}
+        public Fragment getItem(int position) {
+            PagerFragment fragment = new PagerFragment();
 
-        @Override
-        public void release() {}
-
-        @NonNull
-        @Override
-        public InputStream open() throws IOException {
-            if (mStream != null) {
-                throw new IOException("Can't open twice");
+            switch (position % 6) {
+                case 0:
+                case 1:
+                    fragment.setImageId(R.raw.h_line);
+                    break;
+                case 2:
+                case 3:
+                    fragment.setImageId(R.raw.jpeg_large);
+                    break;
+                case 4:
+                case 5:
+                    fragment.setImageId(R.raw.v_line);
+                    break;
             }
-            return getResources().openRawResource(mId);
+
+            return fragment;
         }
 
         @Override
-        public void close() {
-            if (mStream != null) {
-                try {
-                    mStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                mStream = null;
-            }
+        public int getCount() {
+            return 100;
         }
     }
-
-
 }
