@@ -135,6 +135,10 @@ public class TiledBitmapSource extends ImageSource {
     }
 
     private static void recycleTiles(List<Tile> tiles) {
+        if (tiles == null) {
+            return;
+        }
+
         for (Tile tile : tiles) {
             final Bitmap bitmap = tile.bitmap;
             if (bitmap != null) {
