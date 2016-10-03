@@ -160,8 +160,8 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
         mMinScale = Math.min(MIN_SCALE, fitScale);
 
         final float[] scaleArray = mScaleArray;
-        scaleArray[0] = widthScale;
-        scaleArray[1] = heightScale;
+        scaleArray[0] = clamp(widthScale, MIN_SCALE, MAX_SCALE);
+        scaleArray[1] = clamp(heightScale, MIN_SCALE, MAX_SCALE);
         scaleArray[2] = 1.0f;
         Arrays.sort(scaleArray);
     }
