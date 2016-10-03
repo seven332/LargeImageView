@@ -38,6 +38,7 @@ import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewParent;
 import android.view.animation.Interpolator;
 
 import java.lang.annotation.Retention;
@@ -94,6 +95,9 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
     private float mMinScale;
     // fit width, fit height, 1.0f
     private final float[] mScaleArray = new float[3];
+
+    // Current running animator count
+    private int mAnimating;
 
     private GestureRecognizer mGestureRecognizer;
 
@@ -394,6 +398,16 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
             }
         } else {
             remainY = dy;
+        }
+
+        // Check requestDisallowInterceptTouchEvent
+        // Don't call requestDisallowInterceptTouchEvent when animated
+        // Only call requestDisallowInterceptTouchEvent when on room for scroll left or right
+        if (mAnimating == 0 && dx == remainX) {
+            final ViewParent parent = getParent();
+            if (parent != null) {
+                parent.requestDisallowInterceptTouchEvent(false);
+            }
         }
 
         if (dx != remainX || dy != remainY) {
@@ -713,6 +727,13 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        // Always call parent.requestDisallowInterceptTouchEvent(true)
+        // When get edge, translate() will call parent.requestDisallowInterceptTouchEvent(false)
+        final ViewParent parent = getParent();
+        if (parent != null) {
+            parent.requestDisallowInterceptTouchEvent(true);
+        }
+
         mGestureRecognizer.onTouchEvent(event);
         return true;
     }
@@ -757,12 +778,16 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
     }
 
     public void onAnimatorStart() {
+        ++mAnimating;
+
         if (mImage != null) {
             mImage.onAnimatorStart();
         }
     }
 
     public void onAnimatorEnd() {
+        --mAnimating;
+
         if (mImage != null) {
             mImage.onAnimatorEnd();
         }
