@@ -34,6 +34,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -518,6 +519,10 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
         if (mImage != null) {
             cancelAllAnimator();
             mImage.setCallback(null);
+            unscheduleImage(mImage);
+            if (ViewCompat.isAttachedToWindow(this)) {
+                mImage.setVisible(false);
+            }
             mImage.recycle();
             mDst.setEmpty();
             mSrcActual.setEmpty();
@@ -531,6 +536,9 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
 
         if (image != null) {
             image.setCallback(this);
+            if (ViewCompat.isAttachedToWindow(this)) {
+                image.setVisible(getVisibility() == VISIBLE);
+            }
             image.setWindowSize(mWindowWidth, mWindowHeight);
             if (mMaxBitmapSize != 0) {
                 image.setMaxBitmapSize(mMaxBitmapSize);
@@ -625,6 +633,14 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
             // Use dump drawable to call unscheduleDrawable
             ensureDumpDrawable();
             unscheduleDrawable(mDumpDrawable, what);
+        }
+    }
+
+    public void unscheduleImage(@NonNull ImageSource who) {
+        if (who == mImage) {
+            // Use dump drawable to call unscheduleDrawable
+            ensureDumpDrawable();
+            unscheduleDrawable(mDumpDrawable);
         }
     }
 
