@@ -721,7 +721,7 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
     public void setVisibility(int visibility) {
         super.setVisibility(visibility);
         if (mImage != null) {
-            mImage.setVisible(visibility == VISIBLE);
+            mImage.setVisible(ViewCompat.isAttachedToWindow(this) && visibility == VISIBLE);
         }
     }
 
