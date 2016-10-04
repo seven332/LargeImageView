@@ -615,7 +615,7 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
         if (who == mImage) {
             // Use dump drawable to call scheduleDrawable
             ensureDumpDrawable();
-            mDumpDrawable.scheduleSelf(what, when);
+            scheduleDrawable(mDumpDrawable, what, when);
         }
     }
 
@@ -624,7 +624,7 @@ public class LargeImageView extends View implements ImageSource.Callback, Gestur
         if (who == mImage) {
             // Use dump drawable to call unscheduleDrawable
             ensureDumpDrawable();
-            mDumpDrawable.unscheduleSelf(what);
+            unscheduleDrawable(mDumpDrawable, what);
         }
     }
 
